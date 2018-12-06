@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+	
+	
+	
+	
+		<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="19cd6e09-8178-4dbd-acd2-d6a44450a4a7" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="filereadpocFlow" doc:id="fbbef77f-eae4-4591-b4a8-40b958f51cb7" >
+		<http:listener doc:name="Listener" doc:id="b14ff800-a52f-4436-9730-d76e6a78838c" config-ref="HTTP_Listener_config" path="/file"/>
+		<set-variable value="${mule.home}" doc:name="Set Variable" doc:id="6576221b-87ce-4346-9cb9-62bf27076af9" variableName="MuleHome"/>
+		<set-variable value="${app.name}" doc:name="Set Variable" doc:id="3751210a-4042-48d1-bd22-dc60f3c2294b" variableName="AppName"/>
+		<logger level="INFO" doc:name="Logger" doc:id="3c11117d-89ea-4662-8057-b0da10f1e289" message="#[vars.MuleHome]"/>
+		<java:new doc:name="New" doc:id="606335ba-dde2-4bcf-aad1-cde5713ef00d" class="filereadpoc.FileReadPOC" constructor="FileReadPOC()" target="fileReadPOCInstance"/>
+		<java:invoke doc:name="Invoke" doc:id="89b10978-2b7b-4856-a275-7368c04c0460" instance="#[vars.fileReadPOCInstance]" class="filereadpoc.FileReadPOC" method="read(String, String)">
+			<java:args ><![CDATA[#[{"arg0": vars.MuleHome, "arg1": vars.AppName}]]]></java:args>
+		</java:invoke>
+		<logger level="INFO" doc:name="Logger" doc:id="ddee5a7c-878b-452a-bd64-6c1169ab84ad" />
+	</flow>
+	
+	</mule>
