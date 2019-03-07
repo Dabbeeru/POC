@@ -5,7 +5,7 @@
                 steps {
                     git branch: 'master',
                         credentialsId: 'gitlab',
-                    url: 'https://github.com/bmr403/CoreProject.git'
+                    url: 'https://github.com/Dabbeeru/POC.git'
         
                     sh "ls -lat"
                 }
