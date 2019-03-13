@@ -25,9 +25,9 @@
     sh 'echo "USERNAME $USERNAME PASSWORD $PASSWORD" '
            
   configFileProvider([configFile(fileId: 'maven-settings', variable: 'SETTINGS')]) {
-                    sh '
+                    sh "docker run -it --rm --name my-maven-project -v "$PWD":/usr/src/app -w /usr/src/app maven:3.0.5-jdk-8 mvn clean install" 
 
-docker run -it --rm --name my-maven-project -v "$PWD":/usr/src/app -w /usr/src/app maven:3.0.5-jdk-8 mvn clean install'  
+ 
   }
 }
 			
