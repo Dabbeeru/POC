@@ -1,4 +1,9 @@
      pipeline {
+	     
+	     environment {
+    registry = "dilleswari/learning"
+    registryCredential = 'dockerhub'
+  }
           agent any
           stages {
               stage('Checkout external proj') {
@@ -28,7 +33,14 @@ docker run -it --rm --name my-maven-project -v "$PWD":/usr/src/app -w /usr/src/a
 			
 		}
 			}
-
+stage('Building image') {
+      steps{
+        script {
+          docker.build registry + ":$BUILD_NUMBER"
+		 sh 'docker build -t testimg '
+        }
+      }
+    }
   
 
      }
