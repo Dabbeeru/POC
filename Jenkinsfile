@@ -1,47 +1,57 @@
-     pipeline {
-	     
-	     environment {
-    registry = "dilleswari/learning"
-    registryCredential = 'dockerhub'
-  }
-          agent any
-          stages {
-              stage('Checkout external proj') {
-                steps {
-                    git branch: 'master',
-                        credentialsId: 'gitlab',
-                    url: 'https://github.com/Dabbeeru/POC.git'
-        
-                    sh "ls -lat"
-                }
-        		}
-        	
-            
-              
-            stage('creating package') {
-      steps {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId:'anypoint.credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) 
-        {
-    sh 'echo "USERNAME $USERNAME PASSWORD $PASSWORD" '
-           
-  configFileProvider([configFile(fileId: 'maven-settings', variable: 'SETTINGS')]) {
-                    sh "docker run -it --rm --name my-maven-project -v "$PWD":/usr/src/app -w /usr/src/app maven:3.0.5-jdk-8 mvn clean install" 
-
- 
-  }
-}
+pipeline {
+    agent any
+    stages {  
+	
+	stage ('test:unit') {
+			steps { 
+				sh '''#!/bin/bash
+				set -ex
 			
-		}
+				mvn -s settings.xml clean test '''
 			}
-stage('Building image') {
-      steps{
-        script {
-          docker.build registry + ":$BUILD_NUMBER"
-		 sh 'docker build -t testimg '
-        }
-      }
+		}
+		stage ('build:install') {
+			steps { 
+				sh '''#!/bin/bash		
+				set -ex	   
+				mvn -s settings.xml package '''
+			}
+		}
+		stage('deploy:dev') {
+			environment {
+				ANYPOINT_CREDENTIALS = credentials('anypoint.credentials') 
+			}
+			steps {				
+				sh '''#!/bin/bash
+				set -ex
+				
+				mvn -s settings.xml deploy \
+				-DmuleDeploy \
+				-DskipTests \
+				-Danypoint.credentials.user=${ANYPOINT_CREDENTIALS_USR} \
+				-Danypoint.credentials.pwd=${ANYPOINT_CREDENTIALS_PSW} \
+				-Ddeploy.appname.prefix=dev- \
+				-Ddeploy.environment=Dev \
+				'''
+			}
+		}
+		
+		
+		stage (googlestorage) {
+		
+		steps {
+			sh '''#!/bin/bash
+				set -ex
+			gcloud auth activate-service-account --key-file /data/secret/mulsoft-account-technology-platform-235213.json	
+			gsutil cp target/*.jar gs://shareservice-mulesoft-artifacts/mule-app-cicd-1.0.0-SNAPSHOT-mule-application-$BUILD_NUMBER.jar
+			
+		'''
+			
+			}
+		}
+		
     }
-  
+}		 		
+		
 
-     }
-     } 
+		
