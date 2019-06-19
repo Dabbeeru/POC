@@ -1,1 +1,96 @@
 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "consumer-profile-ms.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "consumer-profile-ms.name" . }}
+    helm.sh/chart: {{ include "consumer-profile-ms.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "consumer-profile-ms.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "consumer-profile-ms.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+       - name: consumer-profile-ms
+        env:
+     - name: JAVA_OPTS
+          value: -Xmx256m -Xms256m
+        - name: logging-level-root
+          valueFrom:
+          configMapKeyRef:
+            name: consumer-profile-ms
+            key: logging-level-root
+         - name: logging-level-springframework
+           valueFrom:
+           configMapKeyRef:
+            name: consumer-profile-ms
+            key: logging-level-springframework 
+         - name: logging-level-hibernate
+          valueFrom:
+           configMapKeyRef:
+            name: consumer-profile-ms
+            key: logging-level-hibernate
+         - name: logging-level-com-techco
+          valueFrom:
+           configMapKeyRef:
+            name: consumer-profile-ms
+            key: logging-level-com-techco
+         - name: spring-datasource-url
+          valueFrom:
+           configMapKeyRef:
+            name: consumer-profile-ms
+            key: spring-datasource-url
+         - name: spring-datasource-username
+          valueFrom:
+           configMapKeyRef:
+            name: consumer-profile-ms
+          key: spring-datasource-username
+         - name: spring-datasource-password
+          valueFrom:
+           configMapKeyRef:
+            name: consumer-profile-ms
+            key: spring-datasource-password
+         - name: spring-jpa-hibernate-ddl-auto
+          valueFrom:
+           configMapKeyRef:
+            name: consumer-profile-ms
+            key: spring-jpa-hibernate-ddl-auto
+         - name: consumer-loyalty-url
+          valueFrom:
+           configMapKeyRef:
+            name: consumer-profile-ms
+            key: consumer-loyalty-url   
+              # protocol: TCP
+        resources: 
+          limits:
+            memory: {{ .Values.resources.limits.memory }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.livenessProbe.httpGet.path }}
+            port: {{ .Values.livenessProbe.httpGet.port }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.readinessProbe.httpGet.path }}
+            port: {{ .Values.readinessProbe.httpGet.port }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }} 
+           
